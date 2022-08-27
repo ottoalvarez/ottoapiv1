@@ -9,6 +9,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv'
 import cors from 'cors';
 import express from 'express'
+import efu from 'express-fileupload';
 
 /** CONFIG IMPORTS */
 import { allowdomains } from './src/config/cors.js';
@@ -28,6 +29,13 @@ const morganLogs = rfs.createStream(`morgan-${moment().format('MMMM-YYYY')}.log`
 dotenv.config();
 api.use(morgan('combined', { stream: morganLogs }))
 api.use(cors(corsEnable));
+api.use(efu({
+    abortOnLimit: true,
+    limits: { fileSize: 52428800 /** 50MB */ },
+    useTempFiles: true,
+    tempFileDir: path.join(path.resolve(), './src/tmp'),
+    debug: false
+}))
 
 fs.readdirSync(routePath).forEach(async(filename) => {
     let route = path.join(routePath, filename);
