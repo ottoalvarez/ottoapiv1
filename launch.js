@@ -48,4 +48,24 @@ fs.readdirSync(routePath).forEach(async(filename) => {
     }
 });
 
-api.listen(process.env.portAPI, () => console.log(`[${moment()}] "API launched on port ${process.env.portAPI}"`))
+api.listen(process.env.portAPI, () => console.log(`[${moment()}] "API launched on port ${process.env.portAPI}"`));
+
+/** CONFIG CRONJOB */
+import { CronJob } from 'cron';
+import { allowDirectorys } from './src/config/deletebycron.js';
+
+const deleteFiles = new CronJob(
+    '* 0 1 * * *',
+    () => {
+        /** DELETE ALL FILES INTO src/tmp FOLDER */
+        allowDirectorys.map((dir) => {
+            const directory = path.join(path.resolve(), dir)
+            fs.readdirSync(directory).forEach(f => rmSync(`${directory}/${f}`));
+        })
+    },
+    null,
+    true,
+    'America/Santiago'
+);
+
+deleteFiles.start();
